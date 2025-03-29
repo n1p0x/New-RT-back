@@ -15,15 +15,15 @@ db:
     dir: "migrations"
 
 tg:
-  botToken: 7874545996:AAG8rOoyCyKm1wbZh3dhk7NwumFVDXmb0OA
-  adminBotToken: 7698010051:AAFg5P1zionZ3wtfI9Z4hGrpoC2t_E6yx5Y
-  clientID: 24161366
-  clientHash: 18710bd3a0d52228d12e613305581a91
-  clientPhone: +79378063683
+  botToken: 
+  adminBotToken: 
+  clientID: 
+  clientHash: 
+  clientPhone: 
 
 ton:
   isTestnet: true
-  tonCenterApiKey: ac1e1d07b5e92f90d81f5da9c6bde3e45e878d773fb33296ef9ea29326515069
-  tonCenterApiKeyTestnet: 5305b4fb4a196cb74e20c6f3d0c461132ed9816be6e777cec00d48ec5b77dd30
-  adminWallet: EQBQHwKsnpzTkmzeV2cSqx_RMs_4XS9dl4JywdZbJpj4dqAw
-  mnemonic: day arrange creek electric tunnel tunnel good spy celery right gather guard remove join forest leg hotel filter rate live mass jealous caught expand
+  tonCenterApiKey: 
+  tonCenterApiKeyTestnet: 
+  adminWallet: 
+  mnemonic: 
