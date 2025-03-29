@@ -126,4 +126,4 @@ modules.xml
 
 session
 
-local.yaml
+config/local.yaml
