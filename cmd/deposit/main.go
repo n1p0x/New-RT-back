@@ -2,12 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"sync"
 	"time"
-
-	"gorm.io/gorm"
 
 	"roulette/internal/config"
 	"roulette/internal/database"
@@ -15,7 +12,6 @@ import (
 	depositService "roulette/internal/deposit/service"
 	giftRepo "roulette/internal/gift/repo"
 	giftService "roulette/internal/gift/service"
-	tgService "roulette/internal/tg/service"
 	tonService "roulette/internal/ton/service"
 	userRepo "roulette/internal/user/repo"
 	userService "roulette/internal/user/service"
@@ -27,6 +23,10 @@ const (
 )
 
 func main() {
+	runDeposit()
+}
+
+func runDeposit() {
 	conf, err := config.Load(configPath, envPath)
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
@@ -37,23 +37,6 @@ func main() {
 		log.Fatalf("failed to init db: %v", err)
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	go func() {
-		defer wg.Done()
-		runDeposit(conf, db)
-	}()
-
-	go func() {
-		defer wg.Done()
-		runFloor(conf, db)
-	}()
-
-	wg.Wait()
-}
-
-func runDeposit(conf *config.Config, db *gorm.DB) {
 	serviceTon := tonService.NewService(conf)
 
 	repoUser := userRepo.NewRepo(db)
@@ -100,24 +83,5 @@ func runDeposit(conf *config.Config, db *gorm.DB) {
 			log.Fatalf("failed to get deposits: %v", err)
 		}
 		log.Println("checking deposits completed")
-	}
-}
-
-func runFloor(conf *config.Config, db *gorm.DB) {
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
-	defer cancel()
-
-	repoNft := giftRepo.NewRepo(db)
-	serviceNft := giftService.NewService(repoNft)
-
-	service := tgService.NewService(conf)
-
-	floors, err := service.GetFloors(ctx, 2422226195, -8093627540162659735)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	if err = serviceNft.UpdateCollectionsFloor(ctx, floors); err != nil {
-		log.Printf("failed to update floors: %v", err)
 	}
 }
