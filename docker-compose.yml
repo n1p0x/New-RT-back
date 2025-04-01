@@ -6,7 +6,8 @@ services:
       context: .
       dockerfile: cmd/app/Dockerfile
     environment:
-      - ENV_DB_HOST=host.docker.internal
+      - ENV_SERVER_HOST=
+      - ENV_DB_HOST=
     volumes:
       - ./.env:/app/.env
       - ./config/prod.yaml:/app/config/prod.yaml
@@ -19,7 +20,7 @@ services:
       context: .
       dockerfile: cmd/game/Dockerfile
     environment:
-      - ENV_DB_HOST=host.docker.internal
+      - ENV_DB_HOST=
     volumes:
       - ./.env:/app/.env
       - ./config/prod.yaml:/app/config/prod.yaml
