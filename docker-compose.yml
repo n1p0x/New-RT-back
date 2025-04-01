@@ -6,13 +6,13 @@ services:
       context: .
       dockerfile: cmd/app/Dockerfile
     environment:
-      - ENV_SERVER_HOST=
-      - ENV_DB_HOST=
+      - ENV_SERVER_HOST=0.0.0.0
+      - ENV_DB_HOST=host.docker.internal
     volumes:
       - ./.env:/app/.env
       - ./config/prod.yaml:/app/config/prod.yaml
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     restart: always
 
   game:
@@ -20,7 +20,7 @@ services:
       context: .
       dockerfile: cmd/game/Dockerfile
     environment:
-      - ENV_DB_HOST=
+      - ENV_DB_HOST=host.docker.internal
     volumes:
       - ./.env:/app/.env
       - ./config/prod.yaml:/app/config/prod.yaml

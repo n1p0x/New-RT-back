@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -16,7 +17,7 @@ func TimeoutMiddleware(timeout time.Duration) gin.HandlerFunc {
 		ctx, cancel := context.WithTimeout(c.Request.Context(), timeout)
 
 		defer func() {
-			if ctx.Err() == context.DeadlineExceeded {
+			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
 				c.AbortWithStatus(http.StatusGatewayTimeout)
 			}
 			cancel()
@@ -44,7 +45,7 @@ func AuthMiddleware(token string, mode string) gin.HandlerFunc {
 		authType, authData := auth[0], auth[1]
 
 		if authType == "Tg" {
-			if err := initdata.Validate(authData, token, 0); err != nil {
+			if err := initdata.Validate(authData, token, time.Hour); err != nil {
 				ctx.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
 					"detail": "Invalid init data",
 				})
