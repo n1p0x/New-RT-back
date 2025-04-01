@@ -40,11 +40,10 @@ type DBConfig struct {
 }
 
 type TgConfig struct {
-	BotToken      string `json:"botToken"`
-	AdminBotToken string `json:"adminBotToken"`
-	ClientID      int    `json:"clientID"`
-	ClientHash    string `json:"clientHash"`
-	ClientPhone   string `json:"clientPhone"`
+	BotToken    string `json:"botToken"`
+	ClientID    int    `json:"clientID"`
+	ClientHash  string `json:"clientHash"`
+	ClientPhone string `json:"clientPhone"`
 }
 
 type TonConfig struct {

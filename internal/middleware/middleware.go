@@ -44,7 +44,7 @@ func AuthMiddleware(token string, mode string) gin.HandlerFunc {
 		authType, authData := auth[0], auth[1]
 
 		if authType == "Tg" {
-			if err := initdata.Validate(authData, token, time.Hour); err != nil {
+			if err := initdata.Validate(authData, token, 0); err != nil {
 				ctx.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
 					"detail": "Invalid init data",
 				})
