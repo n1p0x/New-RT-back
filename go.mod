@@ -4,9 +4,9 @@ go 1.24
 
 require (
 	github.com/celestix/gotgproto v1.0.0-beta20.3
+	github.com/gin-contrib/cors v1.7.3
 	github.com/gin-gonic/gin v1.10.0
 	github.com/glebarez/sqlite v1.11.0
-	github.com/go-playground/assert/v2 v2.2.0
 	github.com/gotd/td v0.120.0
 	github.com/knadh/koanf v1.5.0
 	github.com/telegram-mini-apps/init-data-golang v1.3.0
@@ -30,7 +30,6 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.7 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/gin-contrib/cors v1.7.3 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/glebarez/go-sqlite v1.22.0 // indirect
 	github.com/go-faster/errors v0.7.1 // indirect
@@ -50,6 +49,7 @@ require (
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.9 // indirect

@@ -1,11 +1,15 @@
 package config
 
 import (
+	"github.com/joho/godotenv"
+	"github.com/knadh/koanf/providers/env"
 	"log"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/knadh/koanf"
+
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/confmap"
 	"github.com/knadh/koanf/providers/file"
@@ -13,6 +17,7 @@ import (
 
 type Config struct {
 	Mode         string       `json:"mode"`
+	Origin       string       `json:"origin"`
 	ServerConfig ServerConfig `json:"server"`
 	DBConfig     DBConfig     `json:"db"`
 	TgConfig     TgConfig     `json:"tg"`
@@ -32,10 +37,6 @@ type DBConfig struct {
 	Password string `json:"password"`
 	Name     string `json:"name"`
 	Port     int    `json:"port"`
-	Migrate  struct {
-		Enable bool   `json:"enable"`
-		Dir    string `json:"dir"`
-	} `json:"migrate"`
 }
 
 type TgConfig struct {
@@ -54,7 +55,7 @@ type TonConfig struct {
 	Mnemonic               string `json:"mnemonic"`
 }
 
-func Load(configPath string) (*Config, error) {
+func Load(configPath string, envPath string) (*Config, error) {
 	k := koanf.New(".")
 
 	err := k.Load(confmap.Provider(defaultConfig, "."), nil)
@@ -76,23 +77,33 @@ func Load(configPath string) (*Config, error) {
 		}
 	}
 
+	if envPath != "" {
+		path, err := filepath.Abs(envPath)
+		if err != nil {
+			log.Printf("failed to get absolute env path; envPath: %s, err: %v", envPath, err)
+			return nil, err
+		}
+
+		if err := godotenv.Load(path); err != nil {
+			log.Printf("failed to load env from file; err: %v", err)
+			return nil, err
+		}
+
+		log.Printf("load env file from %s", path)
+		if err := k.Load(env.Provider("ENV_", ".", func(s string) string {
+			return strings.Replace(strings.ToLower(
+				strings.TrimPrefix(s, "ENV_")), "_", ".", -1)
+		}), nil); err != nil {
+			log.Printf("failed to load env from file; err: %v", err)
+			return nil, err
+		}
+	}
+
 	var cfg Config
 	if err := k.UnmarshalWithConf("", &cfg, koanf.UnmarshalConf{Tag: "json", FlatPaths: false}); err != nil {
 		log.Printf("failed to unmarshal with conf; err: %v", err)
 		return nil, err
 	}
-	// koanf.UnmarshalConf преобразует данные, собранные из всех источников в структуру Config
-	// UnmarshalWithConf(path string, o interface{}, conf UnmarshalConf)
-	// path string - путь в конфигурации, с которого начинается размаршалинг.
-	// Если пустой, используется вся конфикурация от корна
-	// o interface{} - указатель на объект (обычно структура), в который будут записаны данные
-	// conf UnmarshalConf - структура с настройками процесса размаршалинга
-	// type UnmarshalConf struct {
-	//	 Tag         string            // Тег для маппинга (например, "json")
-	//	 FlatPaths   bool              // Обрабатывать ли ключи как плоские или вложенные
-	//	 Decoder     Decoder           // Пользовательский декодер (опционально)
-	//	 TagFallback []string          // Дополнительные теги (если основной не найден)
-	// }
 
 	return &cfg, err
 }

@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: cmd/app/Dockerfile
+    environment:
+      - ENV_DB_HOST=host.docker.internal
+    volumes:
+      - ./.env:/app/.env
+      - ./config/prod.yaml:/app/config/prod.yaml
+    ports:
+      - "8080:8080"
+    restart: always
+
+  game:
+    build:
+      context: .
+      dockerfile: cmd/game/Dockerfile
+    environment:
+      - ENV_DB_HOST=host.docker.internal
+    volumes:
+      - ./.env:/app/.env
+      - ./config/prod.yaml:/app/config/prod.yaml
+    depends_on:
+      app:
+        condition: service_started
+    restart: always

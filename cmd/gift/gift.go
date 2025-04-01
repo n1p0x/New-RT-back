@@ -51,16 +51,21 @@ func processGift(ctx *ext.Context, update *ext.Update) error {
 
 	giftAction := m.Action.(*tg.MessageActionStarGift)
 	if gift, ok := giftAction.Gift.(*tg.StarGift); ok == true {
-		document := gift.Sticker.(*tg.Document).AsInput()
-		fmt.Println(document.FileReference)
+		document := gift.Sticker.(*tg.Document)
+		mediaDocument := &tg.MessageMediaDocument{Document: document}
 
-		//res, err := ctx.DownloadMedia(
-		//	document,
-		//	ext.DownloadOutputPath(""),
-		//	nil,
-		//)
-		//if err != nil {
-		//}
+		//var mediaDocument *tg.MessageMediaDocument
+		fmt.Println(document.GetFileReference())
+
+		res, err := ctx.DownloadMedia(
+			mediaDocument,
+			ext.DownloadOutputPath(""),
+			nil,
+		)
+		if err != nil {
+		}
+
+		fmt.Println(res)
 	}
 
 	return nil

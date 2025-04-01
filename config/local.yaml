@@ -1,0 +1,11 @@
+server:
+  host: localhost
+  port: 8080
+  writeTimeout: 15s
+  gracefulShutdown: 30s
+
+db:
+  host: localhost
+
+ton:
+  isTestnet: true
