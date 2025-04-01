@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -103,7 +104,7 @@ func newServer(lc fx.Lifecycle, cfg *config.Config) *gin.Engine {
 		AllowHeaders:     []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
 	}))
-	r.Use(middleware.AuthMiddleware(cfg.TgConfig.BotToken, gin.DebugMode))
+	r.Use(middleware.AuthMiddleware(cfg.TgConfig.BotToken, cfg.Mode))
 	r.Use(middleware.TimeoutMiddleware(cfg.ServerConfig.WriteTimeout))
 
 	r.HEAD("/ping", func(c *gin.Context) {
@@ -120,7 +121,7 @@ func newServer(lc fx.Lifecycle, cfg *config.Config) *gin.Engine {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			go func() {
-				if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				if err := srv.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
 					log.Fatalf("listen and server: %v", err)
 				}
 			}()

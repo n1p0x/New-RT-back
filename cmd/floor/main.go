@@ -23,6 +23,8 @@ func main() {
 }
 
 func runFloor() {
+	log.Printf("starting...")
+
 	conf, err := config.Load(configPath, envPath)
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
