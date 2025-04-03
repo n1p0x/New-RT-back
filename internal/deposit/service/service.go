@@ -4,16 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"roulette/internal/utils"
-	"strconv"
-	"time"
-
 	"roulette/internal/database"
 	dbModels "roulette/internal/database/models"
 	"roulette/internal/deposit/repo"
 	giftService "roulette/internal/gift/service"
 	tonService "roulette/internal/ton/service"
 	userService "roulette/internal/user/service"
+	"roulette/internal/utils"
+	"strconv"
 )
 
 type Service interface {
@@ -24,8 +22,6 @@ type Service interface {
 	AddNft(ctx context.Context, userID uint, sender string, nftAddress string) error
 
 	addTon(ctx context.Context, userID uint, userBalance int, amount int, msgHash string, payload *string) error
-
-	addGift(ctx context.Context, userID uint, giftID uint, msgID string, createdAt time.Time, title string, collectibleID uint, lottieUrl string) error
 }
 
 type service struct {
@@ -199,38 +195,6 @@ func (s *service) addTon(ctx context.Context, userID uint, userBalance int, amou
 	})
 	if errTx != nil {
 		return fmt.Errorf("failed to execute ton tx: %s", errTx)
-	}
-
-	return nil
-}
-
-func (s *service) addGift(ctx context.Context, userID uint, giftID uint, msgID string, createdAt time.Time, title string, collectibleID uint, lottieUrl string) error {
-	giftDeposit := &dbModels.GiftDepositDB{
-		UserID:    userID,
-		GiftID:    giftID,
-		MsgID:     msgID,
-		CreatedAt: createdAt,
-	}
-
-	errTx := s.repo.RunInTx(ctx, func(ctx context.Context) error {
-		if err := s.repo.AddGift(ctx, giftDeposit); err != nil {
-			if database.IsKeyConflictErr(err) {
-				return fmt.Errorf("gift deposit %s is exists", msgID)
-			}
-			return err
-		}
-
-		if err := s.giftService.AddUserGift(ctx, userID, giftID, title, collectibleID, lottieUrl); err != nil {
-			if database.IsKeyConflictErr(err) {
-				return fmt.Errorf("gift %s exists", giftID)
-			}
-			return err
-		}
-
-		return nil
-	})
-	if errTx != nil {
-		return fmt.Errorf("failed to execute add gift tx: %s", errTx)
 	}
 
 	return nil

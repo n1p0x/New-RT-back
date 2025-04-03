@@ -161,8 +161,10 @@ func (s *service) AddUserNft(ctx context.Context, userNftID uint) error {
 			return err
 		}
 
-		if time.Now().Unix() >= round.StartedAt.Add(3*time.Minute).Unix() {
-			return ErrRoundFinished
+		if round.StartedAt != nil {
+			if time.Now().Unix() >= round.StartedAt.Add(3*time.Minute).Unix() {
+				return ErrRoundFinished
+			}
 		}
 
 		return nil
@@ -206,8 +208,10 @@ func (s *service) AddUserGift(ctx context.Context, userGiftID uint) error {
 			return err
 		}
 
-		if time.Now().Unix() >= round.StartedAt.Add(3*time.Minute).Unix() {
-			return ErrRoundFinished
+		if round.StartedAt != nil {
+			if time.Now().Unix() >= round.StartedAt.Add(3*time.Minute).Unix() {
+				return ErrRoundFinished
+			}
 		}
 
 		return nil

@@ -104,9 +104,11 @@ func (r *repo) GetUserGifts(ctx context.Context, userID uint, roundID uint) (*mo
 				LEFT OUTER JOIN nfts n ON n.id = un.nft_id
 				LEFT OUTER JOIN collections c ON n.collection_id = c.id
 				LEFT OUTER JOIN rounds_nfts rn ON un.id = rn.user_nft_id
-			WHERE u.id = $1::BIGINT AND un.id IS NOT NULL AND (rn.round_id = $2 OR rn.round_id = $2 IS NULL)
+			WHERE u.id = $1::BIGINT AND un.id IS NOT NULL
 		`, userID, roundID).
 		Scan(&nfts)
+
+	//WHERE u.id = $1::BIGINT AND un.id IS NOT NULL AND (rn.round_id = $2 OR rn.round_id = $2 IS NULL)
 
 	var gifts []*model.Gift
 	_ = db.WithContext(ctx).
@@ -117,9 +119,11 @@ func (r *repo) GetUserGifts(ctx context.Context, userID uint, roundID uint) (*mo
 				LEFT OUTER JOIN gifts g ON g.id = ug.gift_id
 				LEFT OUTER JOIN collections c ON g.collection_id = c.id
 				LEFT OUTER JOIN rounds_gifts rg ON ug.id = rg.user_gift_id
-			WHERE u.id = $1::BIGINT AND ug.id IS NOT NULL AND (rg.round_id = $2 OR rg.round_id = $2 IS NULL)
+			WHERE u.id = $1::BIGINT AND ug.id IS NOT NULL
 		`, userID, roundID).
 		Scan(&gifts)
+
+	//WHERE u.id = $1::BIGINT AND ug.id IS NOT NULL AND (rg.round_id = $2 OR rg.round_id = $2 IS NULL)
 
 	if nfts == nil && gifts == nil {
 		return nil, database.ErrNotFound
@@ -152,6 +156,28 @@ func (r *repo) GetWinnerFee(ctx context.Context, userID uint) (int64, error) {
 	return fee, nil
 }
 
+func (r *repo) GetCurrentRoundID(ctx context.Context) (uint, error) {
+	db := database.FromContext(ctx, r.db)
+
+	var roundID uint
+	err := db.WithContext(ctx).
+		Raw(`
+			SELECT id
+			FROM rounds
+			ORDER BY created_at DESC
+			LIMIT 1
+		`).
+		First(&roundID).Error
+	if err != nil {
+		if database.IsRecordNotFoundErr(err) {
+			return 0, database.ErrNotFound
+		}
+		return 0, err
+	}
+
+	return roundID, nil
+}
+
 func (r *repo) AddNft(ctx context.Context, nft *dbModels.NftDB) (uint, error) {
 	db := database.FromContext(ctx, r.db)
 
@@ -168,7 +194,7 @@ func (r *repo) AddNft(ctx context.Context, nft *dbModels.NftDB) (uint, error) {
 	return nft.ID, nil
 }
 
-func (r *repo) AddGift(ctx context.Context, gift *dbModels.GiftDB) (uint, error) {
+func (r *repo) AddGift(ctx context.Context, gift *dbModels.GiftDB) (int64, error) {
 	db := database.FromContext(ctx, r.db)
 
 	err := db.WithContext(ctx).Create(&gift).Error
@@ -198,7 +224,7 @@ func (r *repo) AddUserNft(ctx context.Context, userID uint, nftID uint) error {
 	return nil
 }
 
-func (r *repo) AddUserGift(ctx context.Context, userID uint, giftID uint) error {
+func (r *repo) AddUserGift(ctx context.Context, userID int64, giftID int64) error {
 	db := database.FromContext(ctx, r.db)
 
 	err := db.WithContext(ctx).

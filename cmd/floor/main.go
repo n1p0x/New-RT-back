@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -23,14 +22,14 @@ func main() {
 }
 
 func runFloor() {
-	log.Printf("starting...")
+	log.Println("starting...", time.Now().Format("2006-01-02 15:04:05"))
 
-	conf, err := config.Load(configPath, envPath)
+	cfg, err := config.Load(configPath, envPath)
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		log.Fatalf("failed to load cfgig: %v", err)
 	}
 
-	db, err := database.NewDatabase(conf)
+	db, err := database.NewDatabase(cfg)
 	if err != nil {
 		log.Fatalf("failed to init db: %v", err)
 	}
@@ -38,17 +37,19 @@ func runFloor() {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
-	repoNft := giftRepo.NewRepo(db)
-	serviceNft := giftService.NewService(repoNft)
+	repoGift := giftRepo.NewRepo(db)
+	serviceGift := giftService.NewService(repoGift)
 
-	service := tgService.NewService(conf)
+	service := tgService.NewService(cfg)
 
-	floors, err := service.GetFloors(ctx, 2422226195, -8093627540162659735)
+	floors, err := service.GetFloorsLow(ctx, 2422226195, -6696550584382502344)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatalf("failed to get floors: %v", err)
 	}
 
-	if err = serviceNft.UpdateCollectionsFloor(ctx, floors); err != nil {
-		log.Printf("failed to update floors: %v", err)
+	if err = serviceGift.UpdateCollectionsFloor(ctx, floors); err != nil {
+		log.Fatalf("failed to update floors: %v", err)
 	}
+
+	log.Println("finished", time.Now().Format("2006-01-02 15:04:05"))
 }

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"math/big"
 
 	"roulette/internal/database"
 	dbModels "roulette/internal/database/models"
@@ -10,12 +11,19 @@ import (
 	tgModel "roulette/internal/tg/model"
 )
 
+func (s *service) GetCollectionByName(ctx context.Context, name string) (*model.Collection, error) {
+	collection, err := s.repo.GetCollectionByName(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	return collection, nil
+}
+
 func (s *service) GetCollections(ctx context.Context) ([]*model.Collection, error) {
 	collections, err := s.repo.GetCollections(ctx)
 	if err != nil {
 		return nil, err
 	}
-
 	return collections, nil
 }
 
@@ -39,7 +47,9 @@ func (s *service) GetUserGift(ctx context.Context, userGiftID uint) (*model.User
 }
 
 func (s *service) GetUserGifts(ctx context.Context, userID uint) (*model.UserGifts, int64, error) {
-	userGifts, err := s.repo.GetUserGifts(ctx, userID, 1)
+	roundID, _ := s.repo.GetCurrentRoundID(ctx)
+
+	userGifts, err := s.repo.GetUserGifts(ctx, userID, roundID)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -72,12 +82,14 @@ func (s *service) AddUserNft(ctx context.Context, userID uint, name string, coll
 	return nil
 }
 
-func (s *service) AddUserGift(ctx context.Context, userID uint, giftID uint, title string, collectibleID uint, lottieUrl string) error {
+func (s *service) AddUserGift(ctx context.Context, userID, giftID, msgID int64, name string, collectibleID, collectionID int, lottieUrl string) error {
 	gift := &dbModels.GiftDB{
 		ID:            giftID,
-		Title:         title,
+		MsgID:         msgID,
+		Name:          name,
 		CollectibleID: collectibleID,
 		LottieUrl:     lottieUrl,
+		CollectionID:  collectionID,
 	}
 
 	errTx := s.repo.RunInTx(ctx, func(ctx context.Context) error {
@@ -100,9 +112,32 @@ func (s *service) AddUserGift(ctx context.Context, userID uint, giftID uint, tit
 }
 
 func (s *service) UpdateCollectionsFloor(ctx context.Context, floors []*tgModel.CollectionFloor) error {
+	collections, err := s.repo.GetCollections(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get collections: %v", err)
+	}
+
+	floorMap := make(map[string]*big.Int)
+	for _, floor := range floors {
+		floorMap[floor.Name] = floor.Floor
+	}
+
+	defaultFloor := big.NewInt(550000000)
+	for _, collection := range collections {
+		if _, ok := floorMap[collection.Name]; !ok {
+			collectionFloor := &tgModel.CollectionFloor{
+				Name:  collection.Name,
+				Floor: defaultFloor,
+			}
+			floors = append(floors, collectionFloor)
+		}
+	}
+
+	fmt.Println(floors)
+
 	var errs []error
 	for _, floor := range floors {
-		if err := s.repo.UpdateCollectionFloor(ctx, floor.Name, floor.Floor); err != nil {
+		if err = s.repo.UpdateCollectionFloor(ctx, floor.Name, floor.Floor); err != nil {
 			errs = append(errs, err)
 		}
 	}

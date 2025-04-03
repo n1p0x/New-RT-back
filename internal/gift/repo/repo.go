@@ -21,17 +21,19 @@ type Repo interface {
 
 	GetUserGift(ctx context.Context, userGiftID uint) (*model.UserGift, error)
 
-	GetUserGifts(ctx context.Context, userID uint, roundID uint) (*model.UserGifts, error)
+	GetUserGifts(ctx context.Context, userID, roundID uint) (*model.UserGifts, error)
 
 	GetWinnerFee(ctx context.Context, userID uint) (int64, error)
 
+	GetCurrentRoundID(ctx context.Context) (uint, error)
+
 	AddNft(ctx context.Context, nft *dbModels.NftDB) (uint, error)
 
-	AddGift(ctx context.Context, gift *dbModels.GiftDB) (uint, error)
+	AddGift(ctx context.Context, gift *dbModels.GiftDB) (int64, error)
 
 	AddUserNft(ctx context.Context, userID uint, nftID uint) error
 
-	AddUserGift(ctx context.Context, userID uint, giftID uint) error
+	AddUserGift(ctx context.Context, userID int64, giftID int64) error
 
 	UpdateCollectionFloor(ctx context.Context, collectionName string, floor *big.Int) error
 }

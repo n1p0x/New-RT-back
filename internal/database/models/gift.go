@@ -27,11 +27,12 @@ func (NftDB) TableName() string {
 }
 
 type GiftDB struct {
-	ID            uint   `gorm:"column:id"`
-	Title         string `gorm:"column:title"`
-	CollectibleID uint   `gorm:"column:collectible_id"`
+	ID            int64  `gorm:"column:id"`
+	MsgID         int64  `gorm:"column:msg_id"`
+	Name          string `gorm:"column:name"`
+	CollectibleID int    `gorm:"column:collectible_id"`
 	LottieUrl     string `gorm:"column:lottie_url"`
-	CollectionID  uint   `gorm:"column:collection_id"`
+	CollectionID  int    `gorm:"column:collection_id"`
 }
 
 func (GiftDB) TableName() string {
@@ -51,8 +52,8 @@ func (UserNftDB) TableName() string {
 
 type UserGiftDB struct {
 	ID        uint      `gorm:"column:id"`
-	UserID    uint      `gorm:"column:user_id"`
-	GiftID    uint      `gorm:"column:gift_id"`
+	UserID    int64     `gorm:"column:user_id"`
+	GiftID    int64     `gorm:"column:gift_id"`
 	CreatedAt time.Time `gorm:"column:created_at"`
 }
 

@@ -14,9 +14,11 @@ type Service interface {
 
 	GetClient(ctx context.Context) (*gotgproto.Client, error)
 
-	GetFloors(ctx context.Context, channelID int64, accessHash int64) ([]*model.CollectionFloor, error)
+	GetFloors(ctx context.Context, channelID int64) ([]*model.CollectionFloor, error)
 
-	getChannelMessages(ctx context.Context, channelID int64, accessHash int64) (string, error)
+	GetFloorsLow(ctx context.Context, channelID, accessHash int64) ([]*model.CollectionFloor, error)
+
+	getChannelMessages(ctx context.Context, channelID int64) (string, error)
 }
 
 type service struct {
