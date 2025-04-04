@@ -94,17 +94,17 @@ func runApplication() {
 }
 
 func newServer(lc fx.Lifecycle, cfg *config.Config) *gin.Engine {
-	gin.SetMode("debug")
+	gin.SetMode(cfg.Mode)
 	r := gin.New()
 
 	r.Use(gin.Recovery())
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     []string{cfg.Origin},
 		AllowMethods:     []string{"HEAD", "GET", "POST", "PUT"},
 		AllowHeaders:     []string{"Authorization", "Content-Type"},
 		AllowCredentials: true,
 	}))
-	r.Use(middleware.AuthMiddleware(cfg.TgConfig.BotToken, "debug"))
+	r.Use(middleware.AuthMiddleware(cfg.TgConfig.BotToken, cfg.Mode))
 	r.Use(middleware.TimeoutMiddleware(cfg.ServerConfig.WriteTimeout))
 
 	r.HEAD("/ping", func(c *gin.Context) {
